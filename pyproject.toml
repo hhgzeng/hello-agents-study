@@ -1,0 +1,12 @@
+[project]
+name = "hello-agents-study"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv>=0.9.9",
+    "gradio>=6.13.0",
+    "hello-agents==0.2.0",
+    "qdrant-client==1.15.1",
+]
