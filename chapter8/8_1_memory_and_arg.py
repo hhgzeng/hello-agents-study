@@ -1,8 +1,9 @@
 from dotenv import load_dotenv
-from hello_agents import HelloAgentsLLM, SimpleAgent, ToolRegistry
-from hello_agents.tools import MemoryTool, RAGTool
 
 load_dotenv()
+
+from hello_agents import HelloAgentsLLM, SimpleAgent, ToolRegistry  # noqa: E402
+from hello_agents.tools import MemoryTool, RAGTool  # noqa: E402
 
 # create LLM instance
 llm = HelloAgentsLLM()

@@ -6,7 +6,11 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "dotenv>=0.9.9",
-    "gradio>=6.13.0",
-    "hello-agents==0.2.0",
+    "hello-agents[all]==0.2.8",
+    "markitdown[pdf]>=0.1.5",
+    "neo4j==6.1.0",
     "qdrant-client==1.15.1",
+    "spacy>=3.8.14",
 ]
+[tool.ruff]
+ignore = ["E402"]

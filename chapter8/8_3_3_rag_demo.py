@@ -1,9 +1,8 @@
 from dotenv import load_dotenv
-from hello_agents import HelloAgentsLLM, SimpleAgent, ToolRegistry
-from hello_agents.tools import RAGTool
 
 load_dotenv()
-
+from hello_agents import HelloAgentsLLM, SimpleAgent, ToolRegistry  # noqa: E402
+from hello_agents.tools import RAGTool
 
 # 创建具有 RAG 能力的 Agent
 llm = HelloAgentsLLM()

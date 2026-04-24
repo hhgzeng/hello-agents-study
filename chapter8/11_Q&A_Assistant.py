@@ -8,10 +8,6 @@
 - 学习回顾和报告生成
 """
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 import json
 import os
 import time
@@ -19,7 +15,11 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import gradio as gr
-from hello_agents.tools import MemoryTool, RAGTool
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from hello_agents.tools import MemoryTool, RAGTool  # noqa: E402
 
 
 class PDFLearningAssistant:
@@ -66,7 +66,7 @@ class PDFLearningAssistant:
 
         try:
             # 使用 RAG 工具处理 PDF
-            result = self.rag_tool.run(
+            self.rag_tool.run(
                 {
                     "action": "add_document",
                     "file_path": pdf_path,
@@ -343,8 +343,8 @@ def create_gradio_ui():
 
         report = assistant_state["assistant"].generate_report(save_to_file=True)
 
-        result = f"✅ 学习报告已生成\n\n"
-        result += f"**会话信息**\n"
+        result = "✅ 学习报告已生成\n\n"
+        result += "**会话信息**\n"
         result += f"- 会话时长: {report['session_info']['duration_seconds']:.0f}秒\n"
         result += f"- 加载文档: {report['learning_metrics']['documents_loaded']}\n"
         result += f"- 提问次数: {report['learning_metrics']['questions_asked']}\n"
@@ -356,7 +356,7 @@ def create_gradio_ui():
         return result
 
     # 创建 Gradio 界面
-    with gr.Blocks(title="智能文档问答助手", theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(title="智能文档问答助手") as demo:
         gr.Markdown(
             """
         # 📚 智能文档问答助手
@@ -378,3 +378,94 @@ def create_gradio_ui():
                     value="web_user",
                 )
                 init_btn = gr.Button("初始化助手", variant="primary")
+
+            init_output = gr.Textbox(label="初始化状态", interactive=False)
+            init_btn.click(
+                init_assistant, inputs=[user_id_input], outputs=[init_output]
+            )
+
+            gr.Markdown("### 📄 加载PDF文档")
+            pdf_upload = gr.File(
+                label="上传PDF文件", file_types=[".pdf"], type="filepath"
+            )
+
+            load_btn = gr.Button("加载文档", variant="primary")
+            load_output = gr.Textbox(label="加载状态", interactive=False)
+            load_btn.click(load_pdf, inputs=[pdf_upload], outputs=[load_output])
+
+        with gr.Tab("💬 智能问答"):
+            gr.Markdown("### 向文档提问或回顾学习历程")
+            chatbot = gr.Chatbot(label="对话历史", height=400)
+            with gr.Row():
+                msg_input = gr.Textbox(
+                    label="输入问题",
+                    placeholder="例如：什么是Transformer？ 或 我之前学过什么？",
+                    scale=4,
+                )
+                send_btn = gr.Button("发送", variant="primary", scale=1)
+
+            gr.Examples(
+                examples=[
+                    "什么是大语言模型？",
+                    "Transformer架构有哪些核心组件？",
+                    "如何训练大语言模型？",
+                    "我之前学过什么内容？",
+                    "回顾一下关于注意力机制的学习",
+                ],
+                inputs=msg_input,
+            )
+
+            msg_input.submit(
+                chat, inputs=[msg_input, chatbot], outputs=[msg_input, chatbot]
+            )
+            send_btn.click(
+                chat, inputs=[msg_input, chatbot], outputs=[msg_input, chatbot]
+            )
+
+        with gr.Tab("📝 学习笔记"):
+            gr.Markdown("### 记录学习心得和重要概念")
+            note_content = gr.Textbox(
+                label="笔记内容", placeholder="输入你的学习笔记...", lines=3
+            )
+            concept_input = gr.Textbox(
+                label="相关概念（可选）", placeholder="例如：transformer, attention"
+            )
+            note_btn = gr.Button("保存笔记", variant="primary")
+            note_output = gr.Textbox(label="保存状态", interactive=False)
+            note_btn.click(
+                add_note_ui, inputs=[note_content, concept_input], outputs=[note_output]
+            )
+
+        with gr.Tab("📊 学习统计"):
+            gr.Markdown("### 查看学习进度和统计信息")
+            stats_btn = gr.Button("刷新统计", variant="primary")
+            stats_output = gr.Markdown()
+            stats_btn.click(get_stats_ui, outputs=[stats_output])
+
+            gr.Markdown("### 生成学习报告")
+            report_btn = gr.Button("生成报告", variant="primary")
+            report_output = gr.Textbox(label="报告状态", interactive=False)
+            report_btn.click(generate_report_ui, outputs=[report_output])
+
+    return demo
+
+
+def main():
+    """主函数 - 启动Gradio Web UI"""
+    print("\n" + "=" * 60)
+    print("智能文档问答助手")
+    print("=" * 60)
+    print("正在启动Web界面...\n")
+
+    demo = create_gradio_ui()
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        share=False,
+        show_error=True,
+        theme=gr.themes.Soft(),
+    )
+
+
+if __name__ == "__main__":
+    main()
