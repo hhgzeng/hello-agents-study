@@ -1,0 +1,116 @@
+{
+  "notes": [
+    {
+      "id": "note_20260427_152043_0",
+      "title": "my_flask_app 项目代码结构探索",
+      "type": "conclusion",
+      "tags": [
+        "codebase",
+        "architecture",
+        "exploration"
+      ],
+      "created_at": "2026-04-27T15:20:43.034847"
+    },
+    {
+      "id": "note_20260427_152130_1",
+      "title": "代码质量分析报告 - 发现问题汇总",
+      "type": "conclusion",
+      "tags": [
+        "code_quality",
+        "analysis"
+      ],
+      "created_at": "2026-04-27T15:21:30.497805"
+    },
+    {
+      "id": "note_20260427_152139_2",
+      "title": "[BLOCKER] 大量未实现的 TODO 标记（共13处）",
+      "type": "blocker",
+      "tags": [
+        "TODO",
+        "未实现功能",
+        "代码完整性"
+      ],
+      "created_at": "2026-04-27T15:21:39.953036"
+    },
+    {
+      "id": "note_20260427_152143_3",
+      "title": "[BLOCKER] 缺少单元测试",
+      "type": "blocker",
+      "tags": [
+        "测试",
+        "质量保障"
+      ],
+      "created_at": "2026-04-27T15:21:43.843730"
+    },
+    {
+      "id": "note_20260427_152149_4",
+      "title": "[BLOCKER] 错误处理与异常管理不完善",
+      "type": "blocker",
+      "tags": [
+        "错误处理",
+        "异常",
+        "可维护性"
+      ],
+      "created_at": "2026-04-27T15:21:49.566795"
+    },
+    {
+      "id": "note_20260427_152155_5",
+      "title": "[BLOCKER] 依赖管理缺失",
+      "type": "blocker",
+      "tags": [
+        "依赖管理",
+        "requirements"
+      ],
+      "created_at": "2026-04-27T15:21:55.517041"
+    },
+    {
+      "id": "note_20260427_152200_6",
+      "title": "[ACTION] 代码质量改进行动计划（更新版）",
+      "type": "action",
+      "tags": [
+        "行动计划",
+        "改进",
+        "优先级",
+        "任务规划"
+      ],
+      "created_at": "2026-04-27T15:22:00.637174"
+    },
+    {
+      "id": "note_20260427_152206_7",
+      "title": "[BLOCKER] 代码重复与设计问题",
+      "type": "blocker",
+      "tags": [
+        "代码重复",
+        "设计问题",
+        "健壮性"
+      ],
+      "created_at": "2026-04-27T15:22:06.577405"
+    },
+    {
+      "id": "note_20260427_152212_8",
+      "title": "代码质量 - 正面评价与良好实践",
+      "type": "conclusion",
+      "tags": [
+        "正面评价",
+        "良好实践"
+      ],
+      "created_at": "2026-04-27T15:22:12.262937"
+    },
+    {
+      "id": "note_20260427_152301_9",
+      "title": "[task_state] 项目当前任务状态（更新版）",
+      "type": "task_state",
+      "tags": [
+        "task_state",
+        "项目状态",
+        "规划",
+        "更新"
+      ],
+      "created_at": "2026-04-27T15:23:01.759773"
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-04-27T11:47:30.318468",
+    "total_notes": 10
+  }
+}

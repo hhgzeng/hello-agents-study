@@ -1,0 +1,13 @@
+{
+  "session_info": {
+    "session_id": "session_20260427_153400",
+    "project": "my_flask_app",
+    "duration_seconds": 65.057908
+  },
+  "activity": {
+    "commands_executed": 0,
+    "notes_created": 0,
+    "issues_found": 0
+  },
+  "notes": "📊 笔记摘要\n\n总笔记数: 10\n\n按类型统计:\n  • action: 1\n  • blocker: 5\n  • conclusion: 3\n  • task_state: 1\n"
+}
