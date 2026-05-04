@@ -1,0 +1,1 @@
+print("Hello, this is a custom MCP server!")
