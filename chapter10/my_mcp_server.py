@@ -1,210 +1,243 @@
 """
-简单的 MCP (Model Context Protocol) 服务器示例
-通过 stdio 传输实现，提供基本的计算工具
-遵循 JSON-RPC 2.0 规范
+自定义MCP服务器示例
+
+这是一个简单的MCP服务器，提供基础的数学计算和文本处理工具。
+用于演示如何创建自己的MCP服务器。
+
+运行方式：
+    python my_mcp_server.py
+
+或者作为MCP服务器被客户端调用：
+    MCPClient(["python", "my_mcp_server.py"])
 """
 
-import json
+from fastmcp import FastMCP
 import sys
-from typing import Any, Optional
+import os
+
+# 创建MCP服务器实例
+mcp = FastMCP("MyCustomServer")
 
 
-class SimpleMCPServer:
-    """简单的 MCP 服务器实现"""
-
-    def __init__(self):
-        self.tools = {
-            "add": {
-                "description": "Add two numbers",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "a": {"type": "number", "description": "First number"},
-                        "b": {"type": "number", "description": "Second number"},
-                    },
-                    "required": ["a", "b"],
-                },
-            },
-            "subtract": {
-                "description": "Subtract two numbers",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "a": {"type": "number", "description": "First number"},
-                        "b": {"type": "number", "description": "Second number"},
-                    },
-                    "required": ["a", "b"],
-                },
-            },
-            "multiply": {
-                "description": "Multiply two numbers",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "a": {"type": "number", "description": "First number"},
-                        "b": {"type": "number", "description": "Second number"},
-                    },
-                    "required": ["a", "b"],
-                },
-            },
-        }
-
-    def make_response(
-        self, request_id: Optional[int], result: Any = None, error: Optional[str] = None
-    ) -> dict:
-        """创建符合 JSON-RPC 2.0 规范的响应"""
-        response = {
-            "jsonrpc": "2.0",
-        }
-        if request_id is not None:
-            response["id"] = request_id
-
-        if error:
-            response["error"] = {"code": -32603, "message": error}
-        else:
-            response["result"] = result
-
-        return response
-
-    def handle_initialize(self, params: dict) -> dict:
-        """处理初始化请求"""
-        return {
-            "protocolVersion": "2024-11-05",
-            "capabilities": {
-                "tools": {},
-            },
-            "serverInfo": {
-                "name": "Simple MCP Server",
-                "version": "1.0.0",
-            },
-        }
-
-    def handle_list_tools(self, params: dict) -> dict:
-        """处理列表工具请求"""
-        tools = []
-        for name, schema in self.tools.items():
-            tools.append(
-                {
-                    "name": name,
-                    "description": schema["description"],
-                    "inputSchema": schema["inputSchema"],
-                }
-            )
-        return {"tools": tools}
-
-    def handle_call_tool(self, params: dict) -> tuple:
-        """处理工具调用请求
-        返回 (result, error) 元组
-        """
-        tool_name = params.get("name")
-        arguments = params.get("arguments", {})
-
-        try:
-            if tool_name == "add":
-                result = arguments["a"] + arguments["b"]
-            elif tool_name == "subtract":
-                result = arguments["a"] - arguments["b"]
-            elif tool_name == "multiply":
-                result = arguments["a"] * arguments["b"]
-            else:
-                return None, f"Unknown tool: {tool_name}"
-
-            return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Result: {result}",
-                    }
-                ]
-            }, None
-        except Exception as e:
-            return None, str(e)
-
-    def process_message(self, message: dict) -> Optional[dict]:
-        """处理 MCP 协议消息
-        返回 JSON-RPC 2.0 格式的响应
-        """
-        method = message.get("method")
-        msg_id = message.get("id")
-
-        # 通知消息没有 id，不需要响应
-        is_notification = msg_id is None
-
-        try:
-            if method == "initialize":
-                result = self.handle_initialize(message.get("params", {}))
-                return self.make_response(msg_id, result=result)
-
-            elif method == "tools/list":
-                result = self.handle_list_tools(message.get("params", {}))
-                return self.make_response(msg_id, result=result)
-
-            elif method == "tools/call":
-                result, error = self.handle_call_tool(message.get("params", {}))
-                if error:
-                    return self.make_response(msg_id, error=error)
-                return self.make_response(msg_id, result=result)
-
-            # 处理通知消息（如 notifications/initialized）
-            elif method and method.startswith("notifications/"):
-                # 通知消息不需要响应
-                return None
-
-            else:
-                if is_notification:
-                    # 未知通知，不需要响应
-                    return None
-                return self.make_response(msg_id, error=f"Unknown method: {method}")
-
-        except Exception as e:
-            if is_notification:
-                # 通知消息处理出错，但不需要响应
-                return None
-            return self.make_response(msg_id, error=str(e))
+# ==================== 数学工具 ====================
 
 
-def main():
-    """主入口点"""
-    server = SimpleMCPServer()
+@mcp.tool()
+def add(a: float, b: float) -> float:
+    """
+    加法计算器
 
-    while True:
-        try:
-            # 读取一行输入
-            line = sys.stdin.readline()
-            if not line:
-                break
+    Args:
+        a: 第一个数字
+        b: 第二个数字
 
-            # 解析 JSON 消息
-            message = json.loads(line)
+    Returns:
+        两数之和
+    """
+    return a + b
 
-            # 处理消息
-            response = server.process_message(message)
 
-            # 发送响应
-            if response:
-                print(json.dumps(response), flush=True)
+@mcp.tool()
+def subtract(a: float, b: float) -> float:
+    """
+    减法计算器
 
-        except json.JSONDecodeError as e:
-            print(
-                json.dumps(
-                    {
-                        "jsonrpc": "2.0",
-                        "error": {"code": -32700, "message": f"Parse error: {e}"},
-                    }
-                ),
-                flush=True,
-            )
-        except Exception as e:
-            print(
-                json.dumps(
-                    {
-                        "jsonrpc": "2.0",
-                        "error": {"code": -32603, "message": f"Internal error: {e}"},
-                    }
-                ),
-                flush=True,
-            )
+    Args:
+        a: 被减数
+        b: 减数
 
+    Returns:
+        两数之差
+    """
+    return a - b
+
+
+@mcp.tool()
+def multiply(a: float, b: float) -> float:
+    """
+    乘法计算器
+
+    Args:
+        a: 第一个数字
+        b: 第二个数字
+
+    Returns:
+        两数之积
+    """
+    return a * b
+
+
+@mcp.tool()
+def divide(a: float, b: float) -> float:
+    """
+    除法计算器
+
+    Args:
+        a: 被除数
+        b: 除数
+
+    Returns:
+        两数之商
+
+    Raises:
+        ValueError: 当除数为0时
+    """
+    if b == 0:
+        raise ValueError("除数不能为零")
+    return a / b
+
+
+# ==================== 文本处理工具 ====================
+
+
+@mcp.tool()
+def reverse_text(text: str) -> str:
+    """
+    反转文本
+
+    Args:
+        text: 要反转的文本
+
+    Returns:
+        反转后的文本
+    """
+    return text[::-1]
+
+
+@mcp.tool()
+def count_words(text: str) -> int:
+    """
+    统计文本中的单词数量
+
+    Args:
+        text: 要统计的文本
+
+    Returns:
+        单词数量
+    """
+    return len(text.split())
+
+
+@mcp.tool()
+def to_uppercase(text: str) -> str:
+    """
+    将文本转换为大写
+
+    Args:
+        text: 要转换的文本
+
+    Returns:
+        大写文本
+    """
+    return text.upper()
+
+
+@mcp.tool()
+def to_lowercase(text: str) -> str:
+    """
+    将文本转换为小写
+
+    Args:
+        text: 要转换的文本
+
+    Returns:
+        小写文本
+    """
+    return text.lower()
+
+
+# ==================== 资源定义 ====================
+
+
+@mcp.resource("config://server")
+def get_server_config() -> str:
+    """
+    获取服务器配置信息
+
+    Returns:
+        服务器配置的JSON字符串
+    """
+    import json
+
+    config = {
+        "name": "MyCustomServer",
+        "version": "1.0.0",
+        "tools_count": 8,
+        "description": "自定义MCP服务器示例",
+    }
+    return json.dumps(config, ensure_ascii=False, indent=2)
+
+
+@mcp.resource("info://capabilities")
+def get_capabilities() -> str:
+    """
+    获取服务器能力列表
+
+    Returns:
+        能力列表的文本描述
+    """
+    capabilities = """
+服务器能力列表：
+
+数学计算：
+- add: 加法计算
+- subtract: 减法计算
+- multiply: 乘法计算
+- divide: 除法计算
+
+文本处理：
+- reverse_text: 反转文本
+- count_words: 统计单词数
+- to_uppercase: 转换为大写
+- to_lowercase: 转换为小写
+
+资源：
+- config://server: 服务器配置
+- info://capabilities: 能力列表（本资源）
+"""
+    return capabilities.strip()
+
+
+# ==================== 提示词模板 ====================
+
+
+@mcp.prompt()
+def math_helper() -> str:
+    """
+    数学计算助手提示词
+
+    Returns:
+        提示词模板
+    """
+    return """你是一个数学计算助手。你可以使用以下工具：
+- add(a, b): 计算两数之和
+- subtract(a, b): 计算两数之差
+- multiply(a, b): 计算两数之积
+- divide(a, b): 计算两数之商
+
+请根据用户的问题选择合适的工具进行计算。"""
+
+
+@mcp.prompt()
+def text_processor() -> str:
+    """
+    文本处理助手提示词
+
+    Returns:
+        提示词模板
+    """
+    return """你是一个文本处理助手。你可以使用以下工具：
+- reverse_text(text): 反转文本
+- count_words(text): 统计单词数
+- to_uppercase(text): 转换为大写
+- to_lowercase(text): 转换为小写
+
+请根据用户的需求选择合适的工具处理文本。"""
+
+
+# ==================== 主程序 ====================
 
 if __name__ == "__main__":
-    main()
+    # 运行MCP服务器
+    # FastMCP会自动处理stdio传输
+    mcp.run()
